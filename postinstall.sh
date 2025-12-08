@@ -112,14 +112,14 @@ bash "$REPO_DIR/flatpak/install.sh"
 # -------------------------------------------------------
 # 7) GO, RBENV, ANACONDA INSTALL
 # -------------------------------------------------------
-echo "[7] Installing Go..."
-bash "$REPO_DIR/languages/install_go.sh"
+#echo "[7] Installing Go..."
+#bash "$REPO_DIR/languages/install_go.sh"
 
-echo "[7] Installing rbenv..."
-bash "$REPO_DIR/languages/install_rbenv.sh"
+#echo "[7] Installing rbenv..."
+#bash "$REPO_DIR/languages/install_rbenv.sh"
 
-echo "[7] Installing Anaconda..."
-bash "$REPO_DIR/languages/install_conda.sh"
+#echo "[7] Installing Anaconda..."
+#bash "$REPO_DIR/languages/install_conda.sh"
 
 # -------------------------------------------------------
 # 8) RESTORE DOTFILES
@@ -142,15 +142,16 @@ fi
 # 10) WALLPAPER
 # -------------------------------------------------------
 WALL="$REPO_DIR/wallpapers/jutro 4K.jpg"
-TARGET="$HOME/.local/share/backgrounds/jutro 4K.jpg"
+TARGET="$HOME/Slike/Wallpaper/jutro 4K.jpg"
 
 if [ -f "$WALL" ]; then
     echo "[10] Installing wallpaper..."
-    mkdir -p "$HOME/.local/share/backgrounds"
+    mkdir -p "$HOME/Slike/Wallpaper"
     cp "$WALL" "$TARGET"
 
-    gsettings set org.gnome.desktop.background picture-uri "file://$TARGET" || true
-    gsettings set org.gnome.desktop.background picture-uri-dark "file://$TARGET" || true
+    # GNOME / COSMIC wallpaper set
+    gsettings set org.gnome.desktop.background picture-uri "file://$HOME/Slike/Wallpaper/jutro 4K.jpg"
+    gsettings set org.gnome.desktop.background picture-uri-dark "file://$HOME/Slike/Wallpaper/jutro 4K.jpg"
 fi
 
 # -------------------------------------------------------

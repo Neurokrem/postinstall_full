@@ -21,6 +21,7 @@ fonts-arphic-uming \
 fonts-noto-cjk \
 fonts-noto-cjk-extra \
 fonts-noto-ui-core \
+github-desktop \
 gnome-calculator \
 gnome-video-effects \
 gnome-weather \
