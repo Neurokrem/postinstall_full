@@ -3,11 +3,10 @@ set -euo pipefail
 
 # Ensure flathub remote exists
 if ! flatpak remotes | grep -q flathub; then
-    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/flathub/repo/flathub.flatpakrepo
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 fi
 
 # Install apps
-flatpak install -y flathub ch.theologeek.Manuskript
 flatpak install -y flathub com.github.iwalton3.jellyfin-media-player
 flatpak install -y flathub com.github.tchx84.Flatseal
 flatpak install -y flathub com.protonvpn.www
