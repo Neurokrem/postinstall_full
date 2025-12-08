@@ -22,14 +22,12 @@ fonts-noto-cjk \
 fonts-noto-cjk-extra \
 fonts-noto-ui-core \
 gnome-calculator \
-gnome-online-accounts-gtk \
 gnome-video-effects \
 gnome-weather \
 gnupg \
 gparted \
 htop \
 hunspell-fr \
-hyfetch \
 hyphen-de \
 hyphen-en-ca \
 hyphen-en-gb \
@@ -94,8 +92,6 @@ libxml++2.6-2v5 \
 libxml++2.6-2v5:i386 \
 libyaml-dev \
 logrotate \
-master-pdf-editor-5 \
-megasync \
 mesa-utils \
 mesa-vulkan-drivers \
 mesa-vulkan-drivers:i386 \
@@ -128,7 +124,6 @@ python-mongoengine-doc \
 qemu-system \
 qemu-system-x86 \
 qemu-utils \
-qfinderpro \
 ratbagd \
 refind \
 remmina \
