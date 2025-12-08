@@ -92,6 +92,8 @@ libxml++2.6-2v5 \
 libxml++2.6-2v5:i386 \
 libyaml-dev \
 logrotate \
+master-pdf-editor-5 \
+megasync \
 mesa-utils \
 mesa-vulkan-drivers \
 mesa-vulkan-drivers:i386 \
@@ -115,15 +117,11 @@ p7zip-full \
 piper \
 plocate \
 pop-desktop \
-python3-mongoengine \
-python3-motor \
-python3-netifaces \
 python3-pip \
-python3-pymongo \
-python-mongoengine-doc \
 qemu-system \
 qemu-system-x86 \
 qemu-utils \
+qfinderpro \
 ratbagd \
 refind \
 remmina \
@@ -149,8 +147,6 @@ wine \
 wine32:i386 \
 wine64 \
 winetricks \
-wofi \
-xrdp \
-xxd
+xrdp 
 
 # kraj
