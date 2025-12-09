@@ -1,42 +1,41 @@
 #!/bin/bash
+
+# ======================================================
+#  APT LOCK FIX  — run BEFORE set -e
+# ======================================================
+echo "[fix] Forcing unlock of APT..."
+
+# Kill interfering processes (safe; won't stop script)
+sudo killall packagekit 2>/dev/null || true
+sudo killall fwupd 2>/dev/null || true
+sudo killall pop-shop 2>/dev/null || true
+sudo killall apt.systemd.daily 2>/dev/null || true
+sudo killall unattended-upgrade 2>/dev/null || true
+
+# Stop services that may restart automatically
+sudo systemctl stop packagekit.service 2>/dev/null || true
+sudo systemctl stop fwupd.service 2>/dev/null || true
+sudo systemctl stop pop-shop.service 2>/dev/null || true
+sudo systemctl stop unattended-upgrades.service 2>/dev/null || true
+
+# Remove APT lock files
+sudo rm -f /var/lib/apt/lists/lock || true
+sudo rm -f /var/cache/apt/archives/lock || true
+sudo rm -f /var/lib/dpkg/lock* || true
+sudo rm -f /var/lib/dpkg/lock-frontend || true
+
+# Repair dpkg state
+sudo dpkg --configure -a || true
+
+echo "[fix] APT fully unlocked."
+echo
+
 set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "====================================================="
 echo "     POSTINSTALL STARTED"
 echo "====================================================="
-
-echo "[fix] Forcing APT unlock..."
-
-# stop automatic services that interfere with apt
-sudo systemctl stop packagekit.service 2>/dev/null
-sudo systemctl stop packagekit 2>/dev/null
-sudo systemctl stop packagekit-offline-update.service 2>/dev/null
-sudo systemctl stop fwupd.service 2>/dev/null
-sudo systemctl stop pop-upgrade.service 2>/dev/null
-sudo systemctl stop pop-shop.service 2>/dev/null
-sudo systemctl stop unattended-upgrades.service 2>/dev/null
-
-# kill leftover processes
-sudo killall packagekit 2>/dev/null
-sudo killall fwupd 2>/dev/null
-sudo killall pop-shop 2>/dev/null
-sudo killall apt.systemd.daily 2>/dev/null
-sudo killall unattended-upgrade 2>/dev/null
-
-# remove locks
-sudo rm -f /var/lib/apt/lists/lock
-sudo rm -f /var/cache/apt/archives/lock
-sudo rm -f /var/lib/dpkg/lock*
-sudo rm -f /var/lib/dpkg/lock-frontend
-
-# fix dpkg if left in inconsistent state
-sudo dpkg --configure -a
-
-# wait a moment so nothing restarts
-sleep 2
-
-echo "[fix] APT fully unlocked."
 
 # -------------------------------------------------------
 # 0) Ensure dependencies needed for PPAs
