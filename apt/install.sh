@@ -121,7 +121,6 @@ qemu-system \
 qemu-system-x86 \
 qemu-utils \
 ratbagd \
-refind \
 remmina \
 rsyslog \
 sessioninstaller \
