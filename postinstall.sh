@@ -88,6 +88,31 @@ if ! grep -Rq "kisak/kisak-mesa" /etc/apt/; then
     sudo add-apt-repository -y ppa:kisak/kisak-mesa
 fi
 
+## MEGAsync instalacija
+echo " → MEGAsync (.deb install)"
+
+(
+    TMP_DEB="/tmp/megasync.deb"
+    wget -O "$TMP_DEB" "https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megasync-xUbuntu_24.04_amd64.deb" || true
+    sudo apt install -y "$TMP_DEB" || true
+    sudo apt --fix-broken install -y || true
+    sudo apt install -y "$TMP_DEB" || true
+    rm -f "$TMP_DEB"
+)
+
+## QFinder Pro
+echo " → QFinder Pro (.deb install)"
+
+(
+    TMP_DEB="/tmp/qfinder.deb"
+    wget -O "$TMP_DEB" "https://download.qnap.com/QfinderPro/7.13.0.1014/QNAPQfinderProUbuntux64-7.13.0.1014.deb" || true
+    sudo apt install -y "$TMP_DEB" || true
+    sudo apt --fix-broken install -y || true
+    sudo apt install -y "$TMP_DEB" || true
+    rm -f "$TMP_DEB"
+)
+
+
 
 ## Master PDF Editor (Code Industry)
 echo " → Master PDF Editor (.deb install only — repo disabled)"
@@ -99,6 +124,17 @@ echo " → Master PDF Editor (.deb install only — repo disabled)"
     sudo apt install -y "$TMP_DEB" || true
     rm -f "$TMP_DEB"
 )
+
+## rEFInd
+yes "" | sudo add-apt-repository -y ppa:rodsmith/refind
+
+## VScode
+echo " → Adding VSCode repo (non-interactive)"
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor \
+    | sudo tee /usr/share/keyrings/ms_vscode.gpg >/dev/null
+
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/ms_vscode.gpg] https://packages.microsoft.com/repos/code stable main" \
+    | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 
 echo "[3] Repositories added."
 
