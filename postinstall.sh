@@ -52,11 +52,11 @@ sudo apt install -y software-properties-common ca-certificates curl wget gnupg l
 # ======================================================
 echo "[1] Installing APT packages..."
 
-if [[ -f "$REPO_DIR/apt/install.sh" ]]; then
-    echo "Installing packages from apt/install.sh"
-    xargs -a "$REPO_DIR/apt/install.sh" sudo apt install -y
+if [[ -f "$REPO_DIR/apt/packages.txt" ]]; then
+    echo "Installing packages from apt/packages.txt"
+    xargs -a "$REPO_DIR/apt/packages.txt" sudo apt install -y
 else
-    echo "No apt/install.sh found. Skipping."
+    echo "No apt/packages.txt found. Skipping."
 fi
 
 # ======================================================
@@ -64,11 +64,11 @@ fi
 # ======================================================
 echo "[2] Installing Flatpak packages..."
 
-if [[ -f "$REPO_DIR/flatpak/install.sh" ]]; then
+if [[ -f "$REPO_DIR/flatpak/packages.txt" ]]; then
     while read -r pkg; do
         [[ -z "$pkg" ]] && continue
         flatpak install -y "$pkg" || true
-    done < "$REPO_DIR/flatpak/install.sh"
+    done < "$REPO_DIR/flatpak/packages.txt"
 else
     echo "No flatpak/packages.txt found. Skipping."
 fi
