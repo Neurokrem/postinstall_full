@@ -3,7 +3,6 @@ set -euo pipefail
 
 sudo apt update
 sudo apt install -y \
-bridge-utils \
 ca-certificates \
 cargo \
 cmake \
@@ -46,15 +45,6 @@ init \
 inxi \
 isc-dhcp-common \
 krita \
-language-pack-ar \
-language-pack-de \
-language-pack-en \
-language-pack-es \
-language-pack-fr \
-language-pack-it \
-language-pack-ja \
-language-pack-pt \
-language-pack-ru \
 language-pack-zh-hans \
 language-pack-zh-hant \
 libbpf0 \
@@ -68,13 +58,6 @@ libffado2 \
 libffado2:i386 \
 libfontconfig1-dev \
 libgl1-mesa-dri:i386 \
-libisc-export1105 \
-libllvm15 \
-libllvm15:i386 \
-libmpdec3 \
-libmysofa1:i386 \
-libmysqlclient-dev \
-libnetplan0 \
 libvulkan1:i386 \
 libxcb-xfixes0-dev \
 libxkbcommon-dev \
@@ -106,9 +89,6 @@ piper \
 plocate \
 pop-desktop \
 python3-pip \
-qemu-system \
-qemu-system-x86 \
-qemu-utils \
 ratbagd \
 remmina \
 rsyslog \
@@ -127,8 +107,6 @@ ubuntu-standard \
 uml-utilities \
 vim-common \
 vim-tiny \
-virtinst \
-virt-manager \
 wine \
 wine32:i386 \
 wine64 \
