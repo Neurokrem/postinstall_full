@@ -88,11 +88,6 @@ if ! grep -Rq "kisak/kisak-mesa" /etc/apt/; then
     sudo add-apt-repository -y ppa:kisak/kisak-mesa
 fi
 
-## MEGAsync
-wget https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megasync-xUbuntu_24.04_amd64.deb && sudo apt install "$PWD/megasync-xUbuntu_24.04_amd64.deb"
-
-## QFinder Pro (QNAP)
-wget https://https://www.qnap.com/en/utilities/essentials#utliity_5 && sudo apt install "$PWD/QNAPQfinderProUbuntux64-7.13.0.1014.deb"
 
 ## Master PDF Editor (Code Industry)
 echo " → Master PDF Editor (.deb install only — repo disabled)"
