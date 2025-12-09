@@ -105,14 +105,15 @@ EOF
 fi
 
 ## Master PDF Editor (Code Industry)
-if [ ! -f /etc/apt/keyrings/pubmpekey.asc ]; then
-    echo " → Master PDF Editor"
-    sudo mkdir -p /etc/apt/keyrings
-    sudo wget -qO /etc/apt/keyrings/pubmpekey.asc http://repo.code-industry.net/pubmpekey.asc
-    echo "deb [signed-by=/etc/apt/keyrings/pubmpekey.asc arch=amd64] http://repo.code-industry.net/deb stable main" \
-        | sudo tee /etc/apt/sources.list.d/masterpdfeditor.list >/dev/null
-fi
-
+echo " → Master PDF Editor (.deb install only — repo disabled)"
+(
+    TMP_DEB="/tmp/masterpdf.deb"
+    wget -O "$TMP_DEB" "https://code-industry.net/public/master-pdf-editor-5.9.60-qt5.x86_64.deb" || true
+    sudo apt install -y "$TMP_DEB" || true
+    sudo apt --fix-broken install -y || true
+    sudo apt install -y "$TMP_DEB" || true
+    rm -f "$TMP_DEB"
+)
 echo "[3] Repositories added."
 
 # -------------------------------------------------------
