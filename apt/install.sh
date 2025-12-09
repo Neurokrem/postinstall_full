@@ -47,11 +47,9 @@ isc-dhcp-common \
 krita \
 language-pack-zh-hans \
 language-pack-zh-hant \
-libbpf0 \
 libconfig++9v5 \
 libconfig++9v5:i386 \
 libdbus-1-3:i386 \
-libdns-export1110 \
 libestr0 \
 libfastjson4 \
 libffado2 \
