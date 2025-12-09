@@ -14,7 +14,6 @@ discord \
 distro-info \
 dkms \
 dmg2img \
-docker-compose-v2 \
 fonts-arphic-ukai \
 fonts-arphic-uming \
 fonts-noto-cjk \
@@ -76,15 +75,6 @@ libmpdec3 \
 libmysofa1:i386 \
 libmysqlclient-dev \
 libnetplan0 \
-libpop-upgrade-gtk \
-libprocps8 \
-libsdl2-2.0-0:i386 \
-libsigc++-2.0-0v5:i386 \
-libsqlite3-0:i386 \
-libunistring2 \
-libvirt-clients \
-libvirt-daemon \
-libvirt-daemon-system \
 libvulkan1:i386 \
 libxcb-xfixes0-dev \
 libxkbcommon-dev \
