@@ -7,7 +7,6 @@ bridge-utils \
 ca-certificates \
 cargo \
 cmake \
-code \
 cpu-checker \
 cron \
 curl \
