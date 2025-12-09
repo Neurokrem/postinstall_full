@@ -39,6 +39,24 @@ sudo apt autoclean -y || true
 
 echo "[1] Cleanup completed."
 
+echo "[fix] Checking for APT lock..."
+
+# If packagekit or fwupd are running, kill them
+if pgrep -x "packagekit" >/dev/null || pgrep -x "fwupd" >/dev/null; then
+    echo "[fix] Killing packagekit/fwupd to release APT lock..."
+    sudo killall packagekit 2>/dev/null
+    sudo killall fwupd 2>/dev/null
+    sleep 2
+fi
+
+# Remove stale lock files if they exist
+sudo rm -f /var/lib/apt/lists/lock
+sudo rm -f /var/cache/apt/archives/lock
+sudo rm -f /var/lib/dpkg/lock*
+sudo dpkg --configure -a
+
+echo "[fix] APT lock cleared."
+
 # -------------------------------------------------------
 # 2) FULL SYSTEM UPDATE BEFORE INSTALLATION
 # -------------------------------------------------------
