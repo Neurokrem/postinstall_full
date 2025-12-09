@@ -89,20 +89,10 @@ if ! grep -Rq "kisak/kisak-mesa" /etc/apt/; then
 fi
 
 ## MEGAsync
-if [ ! -f /usr/share/keyrings/meganz-archive-keyring.gpg ]; then
-    echo " → MEGAsync"
-    sudo wget -qO /usr/share/keyrings/meganz-archive-keyring.gpg https://mega.nz/linux/repo/xUbuntu_24.04/Release.key
-    echo "deb [signed-by=/usr/share/keyrings/meganz-archive-keyring.gpg] https://mega.nz/linux/repo/xUbuntu_24.04/ ./" \
-        | sudo tee /etc/apt/sources.list.d/megasync.list >/dev/null
-fi
+wget https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megasync-xUbuntu_24.04_amd64.deb && sudo apt install "$PWD/megasync-xUbuntu_24.04_amd64.deb"
 
 ## QFinder Pro (QNAP)
-if [ ! -f /etc/apt/sources.list.d/qnap-qfinder.list ]; then
-    echo " → QFinder"
-    sudo tee /etc/apt/sources.list.d/qnap-qfinder.list >/dev/null <<EOF
-deb [trusted=yes] http://repo.qnap.com/qpkg/qfinder ./
-EOF
-fi
+wget https://https://www.qnap.com/en/utilities/essentials#utliity_5 && sudo apt install "$PWD/QNAPQfinderProUbuntux64-7.13.0.1014.deb"
 
 ## Master PDF Editor (Code Industry)
 echo " → Master PDF Editor (.deb install only — repo disabled)"

@@ -93,8 +93,6 @@ libxml++2.6-2v5 \
 libxml++2.6-2v5:i386 \
 libyaml-dev \
 logrotate \
-master-pdf-editor-5 \
-megasync \
 mesa-utils \
 mesa-vulkan-drivers \
 mesa-vulkan-drivers:i386 \
@@ -122,7 +120,6 @@ python3-pip \
 qemu-system \
 qemu-system-x86 \
 qemu-utils \
-qfinderpro \
 ratbagd \
 refind \
 remmina \
