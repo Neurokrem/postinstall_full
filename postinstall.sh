@@ -6,23 +6,37 @@ echo "====================================================="
 echo "     POSTINSTALL STARTED"
 echo "====================================================="
 
-echo "[fix] Checking for APT lock..."
+echo "[fix] Forcing APT unlock..."
 
-# If packagekit or fwupd are running, kill them
-if pgrep -x "packagekit" >/dev/null || pgrep -x "fwupd" >/dev/null; then
-    echo "[fix] Killing packagekit/fwupd to release APT lock..."
-    sudo killall packagekit 2>/dev/null
-    sudo killall fwupd 2>/dev/null
-    sleep 2
-fi
+# stop automatic services that interfere with apt
+sudo systemctl stop packagekit.service 2>/dev/null
+sudo systemctl stop packagekit 2>/dev/null
+sudo systemctl stop packagekit-offline-update.service 2>/dev/null
+sudo systemctl stop fwupd.service 2>/dev/null
+sudo systemctl stop pop-upgrade.service 2>/dev/null
+sudo systemctl stop pop-shop.service 2>/dev/null
+sudo systemctl stop unattended-upgrades.service 2>/dev/null
 
-# Remove stale lock files if they exist
+# kill leftover processes
+sudo killall packagekit 2>/dev/null
+sudo killall fwupd 2>/dev/null
+sudo killall pop-shop 2>/dev/null
+sudo killall apt.systemd.daily 2>/dev/null
+sudo killall unattended-upgrade 2>/dev/null
+
+# remove locks
 sudo rm -f /var/lib/apt/lists/lock
 sudo rm -f /var/cache/apt/archives/lock
 sudo rm -f /var/lib/dpkg/lock*
+sudo rm -f /var/lib/dpkg/lock-frontend
+
+# fix dpkg if left in inconsistent state
 sudo dpkg --configure -a
 
-echo "[fix] APT lock cleared."
+# wait a moment so nothing restarts
+sleep 2
+
+echo "[fix] APT fully unlocked."
 
 # -------------------------------------------------------
 # 0) Ensure dependencies needed for PPAs
