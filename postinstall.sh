@@ -89,12 +89,12 @@ if ! grep -Rq "kisak/kisak-mesa" /etc/apt/; then
 fi
 
 ## MEGAsync
-#if [ ! -f /usr/share/keyrings/meganz-archive-keyring.gpg ]; then
-#    echo " → MEGAsync"
-#    sudo wget -qO /usr/share/keyrings/meganz-archive-keyring.gpg https://mega.nz/linux/repo/xUbuntu_24.04/Release.key
-#    echo "deb [signed-by=/usr/share/keyrings/meganz-archive-keyring.gpg] https://mega.nz/linux/repo/xUbuntu_24.04/ ./" \
-#        | sudo tee /etc/apt/sources.list.d/megasync.list >/dev/null
-#fi
+if [ ! -f /usr/share/keyrings/meganz-archive-keyring.gpg ]; then
+    echo " → MEGAsync"
+    sudo wget -qO /usr/share/keyrings/meganz-archive-keyring.gpg https://mega.nz/linux/repo/xUbuntu_24.04/Release.key
+    echo "deb [signed-by=/usr/share/keyrings/meganz-archive-keyring.gpg] https://mega.nz/linux/repo/xUbuntu_24.04/ ./" \
+        | sudo tee /etc/apt/sources.list.d/megasync.list >/dev/null
+fi
 
 ## QFinder Pro (QNAP)
 if [ ! -f /etc/apt/sources.list.d/qnap-qfinder.list ]; then
