@@ -219,28 +219,24 @@ sudo apt autoclean -y || true
 flatpak uninstall --unused -y || true
 
 ## Postavljanje ZSH
-echo "[zsh] Installing ZSH..."
+echo "[zsh] Fixing ZSH shell setup for COSMIC..."
+
+# ensure zsh installed
 sudo apt install -y zsh
 
-echo "[zsh] Setting ZSH as default shell..."
+# hard-force login shell in /etc/passwd (COSMIC bugfix)
+sudo sed -i "s#^\($USER:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\).*#\1/usr/bin/zsh#" /etc/passwd
 chsh -s /usr/bin/zsh "$USER" || true
 
-echo "[dotfiles] Installing user dotfiles..."
-cp -r "$REPO_DIR/dotfiles/." "$HOME/"
+echo "[zsh4humans] Installing using a real ZSH session..."
 
-echo "[zsh4humans] Installing zsh4humans..."
-if command -v curl >/dev/null 2>&1; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)" || true
-else
-  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)" || true
-fi
-
-# OPTIONAL: apply your custom p10k config
-if [[ -f "$REPO_DIR/dotfiles/.p10k.zsh" ]]; then
-  echo "[p10k] Applying custom Powerlevel10k theme..."
-  cp "$REPO_DIR/dotfiles/.p10k.zsh" "$HOME/.p10k.zsh"
-fi
-
+# run installer AS USER inside ZSH (NOT bash!)
+sudo -u "$USER" zsh -c 
+    if command -v curl >/dev/null; then
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"
+    else
+        sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"
+    fi
 
 echo "====================================================="
 echo "     POSTINSTALL COMPLETE"
