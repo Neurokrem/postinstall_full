@@ -175,16 +175,9 @@ bash "$REPO_DIR/flatpak/install.sh"
 #echo "[7] Installing Anaconda..."
 #bash "$REPO_DIR/languages/install_conda.sh"
 
-# -------------------------------------------------------
-# 8) RESTORE DOTFILES
-# -------------------------------------------------------
-if [ -d "$REPO_DIR/dotfiles" ]; then
-    echo "[8] Restoring dotfiles..."
-    cp -r "$REPO_DIR/dotfiles/." "$HOME/"
-fi
 
 # -------------------------------------------------------
-# 9) RESTORE COSMIC CONFIG
+# 8) RESTORE COSMIC CONFIG
 # -------------------------------------------------------
 if [ -d "$REPO_DIR/cosmic" ]; then
     echo "[9] Restoring COSMIC settings..."
@@ -193,7 +186,7 @@ if [ -d "$REPO_DIR/cosmic" ]; then
 fi
 
 # -------------------------------------------------------
-# 10) WALLPAPER
+# 9) WALLPAPER
 # -------------------------------------------------------
 WALL="$REPO_DIR/wallpapers/jutro 4K.jpg"
 TARGET="$HOME/Slike/Wallpaper/jutro 4K.jpg"
@@ -209,12 +202,34 @@ if [ -f "$WALL" ]; then
 fi
 
 # -------------------------------------------------------
+# 10) RESTORE DOTFILES
+# -------------------------------------------------------
+if [ -d "$REPO_DIR/dotfiles" ]; then
+    echo "[8] Restoring dotfiles..."
+    cp -r "$REPO_DIR/dotfiles/." "$HOME/"
+fi
+
+# Dodavanje Kitty konfiguracije
+echo "[kitty] Installing Kitty configuration..."
+mkdir -p "$HOME/.config/kitty"
+cp -r "$REPO_DIR/kitty/." "$HOME/.config/kitty/"
+
+# -------------------------------------------------------
 # 11) FINAL CLEANUP
 # -------------------------------------------------------
 echo "[11] Final cleanup..."
 sudo apt autoremove -y || true
 sudo apt autoclean -y || true
 flatpak uninstall --unused -y || true
+
+## Postavljanje ZSH
+echo "[shell] Setting default shell to ZSH..."
+if ! command -v zsh >/dev/null; then
+    sudo apt install -y zsh
+fi
+
+chsh -s /usr/bin/zsh "$USER" || true
+
 
 echo "====================================================="
 echo "     POSTINSTALL COMPLETE"
