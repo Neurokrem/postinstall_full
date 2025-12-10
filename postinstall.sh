@@ -113,8 +113,6 @@ echo " → QFinder Pro (.deb install)"
     rm -f "$TMP_DEB"
 )
 
-
-
 ## Master PDF Editor (Code Industry)
 echo " → Master PDF Editor (.deb install only — repo disabled)"
 (
@@ -221,12 +219,27 @@ sudo apt autoclean -y || true
 flatpak uninstall --unused -y || true
 
 ## Postavljanje ZSH
-echo "[shell] Setting default shell to ZSH..."
-if ! command -v zsh >/dev/null; then
-    sudo apt install -y zsh
+echo "[zsh] Installing ZSH..."
+sudo apt install -y zsh
+
+echo "[zsh] Setting ZSH as default shell..."
+chsh -s /usr/bin/zsh "$USER" || true
+
+echo "[dotfiles] Installing user dotfiles..."
+cp -r "$REPO_DIR/dotfiles/." "$HOME/"
+
+echo "[zsh4humans] Installing zsh4humans..."
+if command -v curl >/dev/null 2>&1; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)" || true
+else
+  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)" || true
 fi
 
-chsh -s /usr/bin/zsh "$USER" || true
+# OPTIONAL: apply your custom p10k config
+if [[ -f "$REPO_DIR/dotfiles/.p10k.zsh" ]]; then
+  echo "[p10k] Applying custom Powerlevel10k theme..."
+  cp "$REPO_DIR/dotfiles/.p10k.zsh" "$HOME/.p10k.zsh"
+fi
 
 
 echo "====================================================="
