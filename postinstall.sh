@@ -61,6 +61,7 @@ sudo apt purge -y \
   libreoffice-common \
   libreoffice-style* \
   geary \
+  thunderbird \
   gnome-mahjongg \
   gnome-mines \
   gnome-sudoku || true
@@ -124,9 +125,6 @@ echo " → Master PDF Editor (.deb install only — repo disabled)"
     sudo apt install -y "$TMP_DEB" || true
     rm -f "$TMP_DEB"
 )
-
-## rEFInd
-yes "" | sudo add-apt-repository -y ppa:rodsmith/refind
 
 ## VScode
 echo " → Adding VSCode repo (non-interactive)"
