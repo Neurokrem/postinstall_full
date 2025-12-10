@@ -238,6 +238,9 @@ sudo -u "$USER" zsh -c
         sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"
     fi
 
+echo "[p10k] Applying custom theme..."
+cp "$REPO_DIR/dotfiles/.p10k.zsh" "$HOME/.p10k.zsh"
+
 echo "====================================================="
 echo "     POSTINSTALL COMPLETE"
 echo "====================================================="
