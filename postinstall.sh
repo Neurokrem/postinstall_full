@@ -243,6 +243,7 @@ sudo -u "$USER" zsh -c
 
 echo "[p10k] Applying custom theme..."
 cp "$REPO_DIR/dotfiles/.p10k.zsh" "$HOME/.p10k.zsh"
+cp "$REPO_DIR/dotfiles/.p10k-8color.zsh" "$HOME/.p10k-8color.zsh"
 
 echo "====================================================="
 echo "     POSTINSTALL COMPLETE"
