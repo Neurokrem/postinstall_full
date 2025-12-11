@@ -61,6 +61,7 @@ sudo apt purge -y \
   libreoffice-common \
   libreoffice-style* \
   geary \
+  yakuake \
   thunderbird \
   gnome-mahjongg \
   gnome-mines \
@@ -243,13 +244,10 @@ flatpak uninstall --unused -y || true
 ## Postavljanje ZSH
 echo "[zsh] Fixing ZSH shell setup for COSMIC..."
 
-# ensure zsh installed
-sudo apt install -y zsh
-
 echo "[zsh4humans] Installing using a real ZSH session..."
 
 # run installer AS USER inside ZSH (NOT bash!)
-ecoho " Run the next commands inside ZSH:
+echo " Run the next commands inside ZSH:
     sudo -u "$USER" zsh -c 
     if command -v curl >/dev/null; then
         sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"
