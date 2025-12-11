@@ -222,11 +222,6 @@ sudo apt autoremove -y || true
 sudo apt autoclean -y || true
 flatpak uninstall --unused -y || true
 
-## Postavljanje ZSH
-echo "[zsh] Fixing ZSH shell setup for COSMIC..."
-
-echo "[zsh4humans] Installing using a real ZSH session..."
-
 # run installer AS USER inside ZSH (NOT bash!)
 
 sudo -u "$USER" zsh -c 
