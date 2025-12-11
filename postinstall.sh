@@ -190,11 +190,14 @@ TARGET="$HOME/Slike/Wallpaper/jutro 4K.jpg"
 if [ -f "$WALL" ]; then
     echo "[10] Installing wallpaper..."
     mkdir -p "$HOME/Slike/Wallpaper"
+
     cp "$WALL" "$TARGET"
 
-    # GNOME / COSMIC wallpaper set
-    gsettings set org.gnome.desktop.background picture-uri "file://$HOME/Slike/Wallpaper/jutro 4K.jpg"
-    gsettings set org.gnome.desktop.background picture-uri-dark "file://$HOME/Slike/Wallpaper/jutro 4K.jpg"
+    # GSettings cannot handle unescaped spaces reliably → escape manually
+    URI="file://$HOME/Slike/Wallpaper/jutro%204K.jpg"
+
+    gsettings set org.gnome.desktop.background picture-uri "$URI"
+    gsettings set org.gnome.desktop.background picture-uri-dark "$URI"
 fi
 
 # -------------------------------------------------------
