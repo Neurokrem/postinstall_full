@@ -184,21 +184,40 @@ fi
 # -------------------------------------------------------
 # 9) WALLPAPER
 # -------------------------------------------------------
-WALL="$REPO_DIR/wallpapers/jutro 4K.jpg"
-TARGET="$HOME/Slike/Wallpaper/jutro 4K.jpg"
+echo "[10] Installing wallpapers..."
 
-if [ -f "$WALL" ]; then
-    echo "[10] Installing wallpaper..."
-    mkdir -p "$HOME/Slike/Wallpaper"
+WALL_SRC="$REPO_DIR/wallpapers"
+WALL_DEST="$HOME/Slike/Wallpaper"
+WALL_NAME="jutro 4K.jpg"
+WALL_FULL="$WALL_DEST/$WALL_NAME"
 
-    cp "$WALL" "$TARGET"
+# 1) Copy all wallpapers
+mkdir -p "$WALL_DEST"
 
-    # GSettings cannot handle unescaped spaces reliably → escape manually
-    URI="file://$HOME/Slike/Wallpaper/jutro%204K.jpg"
-
-    gsettings set org.gnome.desktop.background picture-uri "$URI"
-    gsettings set org.gnome.desktop.background picture-uri-dark "$URI"
+if [ -d "$WALL_SRC" ]; then
+    cp -r "$WALL_SRC/"* "$WALL_DEST/"
+    echo " → Wallpapers copied."
+else
+    echo " → WARNING: wallpapers directory missing: $WALL_SRC"
 fi
+
+# 2) Apply wallpaper using correct user session DBus
+echo "[11] Setting wallpaper..."
+
+DBUS_ADDR="unix:path=/run/user/$(id -u $USER)/bus"
+
+if [ -f "$WALL_FULL" ]; then
+    sudo -u "$USER" DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
+        gsettings set org.gnome.desktop.background picture-uri "file://$WALL_FULL"
+
+    sudo -u "$USER" DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
+        gsettings set org.gnome.desktop.background picture-uri-dark "file://$WALL_FULL"
+
+    echo " → Wallpaper set to $WALL_NAME"
+else
+    echo " → ERROR: $WALL_FULL not found!"
+fi
+
 
 # -------------------------------------------------------
 # 10) RESTORE DOTFILES
@@ -227,19 +246,16 @@ echo "[zsh] Fixing ZSH shell setup for COSMIC..."
 # ensure zsh installed
 sudo apt install -y zsh
 
-# hard-force login shell in /etc/passwd (COSMIC bugfix)
-sudo sed -i "s#^\($USER:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\).*#\1/usr/bin/zsh#" /etc/passwd
-chsh -s /usr/bin/zsh "$USER" || true
-
 echo "[zsh4humans] Installing using a real ZSH session..."
 
 # run installer AS USER inside ZSH (NOT bash!)
-sudo -u "$USER" zsh -c 
+ecoho " Run the next commands inside ZSH:
+    sudo -u "$USER" zsh -c 
     if command -v curl >/dev/null; then
         sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"
     else
         sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"
-    fi
+    fi"
 
 echo "[p10k] Applying custom theme..."
 cp "$REPO_DIR/dotfiles/.p10k.zsh" "$HOME/.p10k.zsh"
