@@ -185,21 +185,33 @@ fi
 # -------------------------------------------------------
 # 9) WALLPAPER
 # -------------------------------------------------------
-echo "[10] Installing wallpapers..."
+echo "[10] Installing wallpaper..."
 
 WALL="$REPO_DIR/wallpapers/jutro 4K.jpg"
-TARGET="$HOME/Slike/Wallpaper/jutro 4K.jpg"
+TARGET_DIR="$HOME/Slike/Wallpaper"
+TARGET="$TARGET_DIR/jutro 4K.jpg"
 
+mkdir -p "$TARGET_DIR"
+
+# Copy wallpaper
 if [ -f "$WALL" ]; then
-    echo "[10] Installing wallpaper..."
-    mkdir -p "$HOME/Slike/Wallpaper"
     cp "$WALL" "$TARGET"
-
-    # GNOME / COSMIC wallpaper set
-    gsettings set org.gnome.desktop.background picture-uri "file://$HOME/Slike/Wallpaper/jutro 4K.jpg"
-    gsettings set org.gnome.desktop.background picture-uri-dark "file://$HOME/Slike/Wallpaper/jutro 4K.jpg"
+else
+    echo " → ERROR: Wallpaper not found: $WALL"
 fi
 
+# DBus session address
+DBUS_ADDR="unix:path=/run/user/$(id -u $USER)/bus"
+
+echo "[11] Setting wallpaper using session DBus..."
+
+sudo -u "$USER" DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
+    gsettings set org.gnome.desktop.background picture-uri "file://$TARGET"
+
+sudo -u "$USER" DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
+    gsettings set org.gnome.desktop.background picture-uri-dark "file://$TARGET"
+
+echo " → Wallpaper applied."
 
 # -------------------------------------------------------
 # 10) RESTORE DOTFILES
@@ -221,6 +233,7 @@ echo "[11] Final cleanup..."
 sudo apt autoremove -y || true
 sudo apt autoclean -y || true
 flatpak uninstall --unused -y || true
+
 
 echo "====================================================="
 echo "     POSTINSTALL COMPLETE"
