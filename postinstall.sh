@@ -1,158 +1,147 @@
 #!/bin/bash
 
 # ======================================================
-#  APT LOCK FIX  — run BEFORE set -e
+#  RIGOROUS ERROR HANDLING & ENVIRONMENT SETUP
 # ======================================================
-echo "[fix] Forcing unlock of APT..."
-
-# Kill interfering processes (safe; won't stop script)
-sudo killall packagekit 2>/dev/null || true
-sudo killall fwupd 2>/dev/null || true
-sudo killall pop-shop 2>/dev/null || true
-sudo killall apt.systemd.daily 2>/dev/null || true
-sudo killall unattended-upgrade 2>/dev/null || true
-
-# Stop services that may restart automatically
-sudo systemctl stop packagekit.service 2>/dev/null || true
-sudo systemctl stop fwupd.service 2>/dev/null || true
-sudo systemctl stop pop-shop.service 2>/dev/null || true
-sudo systemctl stop unattended-upgrades.service 2>/dev/null || true
-
-# Remove APT lock files
-sudo rm -f /var/lib/apt/lists/lock || true
-sudo rm -f /var/cache/apt/archives/lock || true
-sudo rm -f /var/lib/dpkg/lock* || true
-sudo rm -f /var/lib/dpkg/lock-frontend || true
-
-# Repair dpkg state
-sudo dpkg --configure -a || true
-
-echo "[fix] APT fully unlocked."
-echo
-
+# set -e: Izlazak ako bilo koja naredba ne uspije
+# set -u: Izlazak ako se koristi nedefinirana varijabla
+# set -o pipefail: Neuspjeh ako ijedna naredba u pipe-u ne uspije
 set -euo pipefail
+
+# Definiranje direktorija skripte
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "====================================================="
 echo "     POSTINSTALL STARTED"
 echo "====================================================="
 
-# -------------------------------------------------------
-# 0) Ensure dependencies needed for PPAs
-# -------------------------------------------------------
-echo "[0] Installing base prerequisites..."
-sudo apt update
-sudo apt install -y software-properties-common ca-certificates curl wget gnupg lsb-release
+
+# ======================================================
+#  0) APT LOCK FIX
+# ======================================================
+# Ovaj blok je namjerno postavljen prije set -e/u,
+# ali ga sada omotavamo u podshell da bi set -e bio na vrhu
+(
+    set +euo pipefail # Privremeno isključivanje stroge provjere za ovaj neuredni popravak
+    echo "[fix] Forcing unlock of APT..."
+
+    sudo killall packagekit 2>/dev/null || true
+    sudo killall fwupd 2>/dev/null || true
+    sudo killall pop-shop 2>/dev/null || true
+    sudo killall apt.systemd.daily 2>/dev/null || true
+    sudo killall unattended-upgrade 2>/dev/null || true
+
+    sudo systemctl stop packagekit.service 2>/dev/null || true
+    sudo systemctl stop fwupd.service 2>/dev/null || true
+    sudo systemctl stop pop-shop.service 2>/dev/null || true
+    sudo systemctl stop unattended-upgrades.service 2>/dev/null || true
+
+    sudo rm -f /var/lib/apt/lists/lock || true
+    sudo rm -f /var/cache/apt/archives/lock || true
+    sudo rm -f /var/lib/dpkg/lock* || true
+    sudo rm -f /var/lib/dpkg/lock-frontend || true
+
+    sudo dpkg --configure -a || true
+
+    echo "[fix] APT fully unlocked."
+    echo
+)
+
 
 # -------------------------------------------------------
-# 1) CLEAN DEFAULT JUNK (free space before heavy installs)
+# 1) Ensure dependencies needed for PPAs
 # -------------------------------------------------------
-echo "[1] Removing unwanted preinstalled applications..."
+echo "[1] Installing base prerequisites..."
+sudo apt update
+# Dodan 'git' i 'build-essential'
+sudo apt install -y software-properties-common ca-certificates curl wget gnupg lsb-release git build-essential
+
+# -------------------------------------------------------
+# 2) CLEAN DEFAULT JUNK (free space before heavy installs)
+# -------------------------------------------------------
+echo "[2] Removing unwanted preinstalled applications..."
 
 sudo apt purge -y \
-  libreoffice-base* \
-  libreoffice-calc* \
-  libreoffice-core* \
-  libreoffice-draw* \
-  libreoffice-gnome* \
-  libreoffice-impress* \
-  libreoffice-math* \
-  libreoffice-writer* \
-  libreoffice-common \
-  libreoffice-style* \
-  geary \
-  yakuake \
-  thunderbird \
-  gnome-mahjongg \
-  gnome-mines \
-  gnome-sudoku || true
+  libreoffice-base* libreoffice-calc* libreoffice-core* libreoffice-draw* \
+  libreoffice-gnome* libreoffice-impress* libreoffice-math* libreoffice-writer* \
+  libreoffice-common libreoffice-style* geary yakuake thunderbird \
+  gnome-mahjongg gnome-mines gnome-sudoku || true
 
-sudo apt autoremove -y || true
-sudo apt autoclean -y || true
+sudo apt autoremove -y
+sudo apt autoclean -y
 
-echo "[1] Cleanup completed."
+echo "[2] Cleanup completed."
 
 # -------------------------------------------------------
-# 2) FULL SYSTEM UPDATE BEFORE INSTALLATION
+# 3) FULL SYSTEM UPDATE BEFORE INSTALLATION
 # -------------------------------------------------------
-echo "[2] Updating system..."
+echo "[3] Updating system..."
 sudo apt update
 sudo apt upgrade -y
 
 # -------------------------------------------------------
-# 3) ADD CUSTOM REPOSITORIES (PPAs)
+# 4) ADD CUSTOM REPOSITORIES (PPAs)
 # -------------------------------------------------------
-echo "[3] Adding custom repositories..."
+echo "[4] Adding custom repositories and third-party apps..."
 
 ## Kisak Mesa
 if ! grep -Rq "kisak/kisak-mesa" /etc/apt/; then
-    echo " → Kisak Mesa"
+    echo " → Kisak Mesa (PPA)"
     sudo add-apt-repository -y ppa:kisak/kisak-mesa
 fi
 
-## MEGAsync instalacija
-echo " → MEGAsync (.deb install)"
+## Funkcija za pouzdanu DEB instalaciju
+install_deb() {
+    local URL=$1
+    local FILENAME=$2
+    local TMP_DEB="/tmp/$FILENAME.deb"
 
-(
-    TMP_DEB="/tmp/megasync.deb"
-    wget -O "$TMP_DEB" "https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megasync-xUbuntu_24.04_amd64.deb" || true
-    sudo apt install -y "$TMP_DEB" || true
-    sudo apt --fix-broken install -y || true
-    sudo apt install -y "$TMP_DEB" || true
-    rm -f "$TMP_DEB"
-)
+    echo " → $FILENAME (.deb install)"
+    (
+        # Preuzimanje: ako ne uspije, izlazak iz podshell-a s greškom
+        wget -O "$TMP_DEB" "$URL" || { echo "ERROR: Failed to download $FILENAME DEB." >&2; exit 1; }
+        
+        # Instalacija i automatsko rješavanje ovisnosti (apt -f install)
+        sudo apt install -y "$TMP_DEB" || sudo apt -f install -y
+        
+        rm -f "$TMP_DEB"
+    )
+}
 
-## QFinder Pro
-echo " → QFinder Pro (.deb install)"
+# Primjena funkcije:
+install_deb "https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megasync-xUbuntu_24.04_amd64.deb" "megasync"
+install_deb "https://download.qnap.com/QfinderPro/7.13.0.1014/QNAPQfinderProUbuntux64-7.13.0.1014.deb" "qfinder"
+install_deb "https://code-industry.net/public/master-pdf-editor-5.9.60-qt5.x86_64.deb" "masterpdf"
 
-(
-    TMP_DEB="/tmp/qfinder.deb"
-    wget -O "$TMP_DEB" "https://download.qnap.com/QfinderPro/7.13.0.1014/QNAPQfinderProUbuntux64-7.13.0.1014.deb" || true
-    sudo apt install -y "$TMP_DEB" || true
-    sudo apt --fix-broken install -y || true
-    sudo apt install -y "$TMP_DEB" || true
-    rm -f "$TMP_DEB"
-)
-
-## Master PDF Editor (Code Industry)
-echo " → Master PDF Editor (.deb install only — repo disabled)"
-(
-    TMP_DEB="/tmp/masterpdf.deb"
-    wget -O "$TMP_DEB" "https://code-industry.net/public/master-pdf-editor-5.9.60-qt5.x86_64.deb" || true
-    sudo apt install -y "$TMP_DEB" || true
-    sudo apt --fix-broken install -y || true
-    sudo apt install -y "$TMP_DEB" || true
-    rm -f "$TMP_DEB"
-)
 
 ## VScode
-echo " → Adding VSCode repo (non-interactive)"
+echo " → Adding VSCode repo"
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor \
     | sudo tee /usr/share/keyrings/ms_vscode.gpg >/dev/null
 
 echo "deb [arch=amd64 signed-by=/usr/share/keyrings/ms_vscode.gpg] https://packages.microsoft.com/repos/code stable main" \
     | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 
-echo "[3] Repositories added."
+echo "[4] Repositories added."
 
 # -------------------------------------------------------
-# 4) REFRESH APT AFTER REPOS
+# 5) REFRESH APT AFTER REPOS
 # -------------------------------------------------------
-echo "[4] Refreshing APT after adding repositories..."
+echo "[5] Refreshing APT after adding repositories..."
 sudo apt update
 
 # -------------------------------------------------------
-# 5) RUN APT INSTALLER SCRIPT
+# 6) RUN APT INSTALLER SCRIPT
 # -------------------------------------------------------
-echo "[5] Installing APT packages..."
+echo "[6] Installing APT packages..."
 bash "$REPO_DIR/apt/install.sh"
 
 # -------------------------------------------------------
-# 6) RUN FLATPAK INSTALLER SCRIPT
+# 7) RUN FLATPAK INSTALLER SCRIPT
 # -------------------------------------------------------
-echo "[6] Installing Flatpak packages..."
+echo "[7] Installing Flatpak packages..."
 
-# guarantee flathub
+# Guarantee flathub is added
 if ! flatpak remotes | grep -q flathub; then
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 fi
@@ -160,69 +149,85 @@ fi
 flatpak uninstall --unused -y || true
 bash "$REPO_DIR/flatpak/install.sh"
 
-# -------------------------------------------------------
-# 7) GO, RBENV, ANACONDA INSTALL
-# -------------------------------------------------------
-#echo "[7] Installing Go..."
-#bash "$REPO_DIR/languages/install_go.sh"
-
-#echo "[7] Installing rbenv..."
-#bash "$REPO_DIR/languages/install_rbenv.sh"
-
-#echo "[7] Installing Anaconda..."
-#bash "$REPO_DIR/languages/install_conda.sh"
-
 
 # -------------------------------------------------------
-# 8) RESTORE COSMIC CONFIG
+# 8) ZSH and POWERLEVEL10K INSTALL
 # -------------------------------------------------------
-if [ -d "$REPO_DIR/cosmic" ]; then
-    echo "[9] Restoring COSMIC settings..."
-    mkdir -p "$HOME/.config/cosmic"
-    cp -r "$REPO_DIR/cosmic/." "$HOME/.config/cosmic/"
+echo "[8] Installing Zsh, zsh4humans, and Powerlevel10k..."
+if [ -f "$REPO_DIR/languages/install_zsh.sh" ]; then
+    bash "$REPO_DIR/languages/install_zsh.sh"
+else
+    echo "WARNING: install_zsh.sh not found. Skipping Zsh installation."
 fi
 
 # -------------------------------------------------------
-# 9) WALLPAPER
+# 9) LANGUAGE/ENVIRONMENT INSTALLS (Go, rbenv, Conda)
 # -------------------------------------------------------
-echo "[10] Installing wallpapers..."
+echo "[9] Installing language environments (Go, Ruby, Conda)..."
 
-WALL="$REPO_DIR/wallpapers/jutro 4K.jpg"
-TARGET="$HOME/Slike/Wallpaper/jutro 4K.jpg"
+echo " → Running install_go.sh"
+bash "$REPO_DIR/languages/install_go.sh"
 
-if [ -f "$WALL" ]; then
-    echo "[10] Installing wallpaper..."
-    mkdir -p "$HOME/Slike/Wallpaper"
-    cp "$WALL" "$TARGET"
+echo " → Running install_rbenv.sh"
+bash "$REPO_DIR/languages/install_rbenv.sh"
 
-    # GNOME / COSMIC wallpaper set
-    gsettings set org.gnome.desktop.background picture-uri "file://$HOME/Slike/Wallpaper/jutro 4K.jpg"
-    gsettings set org.gnome.desktop.background picture-uri-dark "file://$HOME/Slike/Wallpaper/jutro 4K.jpg"
-fi
-
+echo " → Running install_conda.sh"
+bash "$REPO_DIR/languages/install_conda.sh"
 
 # -------------------------------------------------------
 # 10) RESTORE DOTFILES
 # -------------------------------------------------------
 if [ -d "$REPO_DIR/dotfiles" ]; then
-    echo "[8] Restoring dotfiles..."
-    cp -r "$REPO_DIR/dotfiles/." "$HOME/"
+    echo "[10] Restoring dotfiles..."
+    # Korištenje -T za kopiranje Sadržaja izvora u odredište
+    cp -rT "$REPO_DIR/dotfiles" "$HOME/"
 fi
 
-# Dodavanje Kitty konfiguracije
-echo "[kitty] Installing Kitty configuration..."
-mkdir -p "$HOME/.config/kitty"
-cp -r "$REPO_DIR/kitty/." "$HOME/.config/kitty/"
 
 # -------------------------------------------------------
-# 11) FINAL CLEANUP
+# 10a) RESTORE DESKTOP CONFIG (COSMIC / Kitty)
 # -------------------------------------------------------
-echo "[11] Final cleanup..."
-sudo apt autoremove -y || true
-sudo apt autoclean -y || true
+if [ -d "$REPO_DIR/cosmic" ]; then
+    echo "[10a] Restoring COSMIC settings..."
+    mkdir -p "$HOME/.config/cosmic"
+    cp -rT "$REPO_DIR/cosmic" "$HOME/.config/cosmic/"
+fi
+
+echo "[10b] Installing Kitty configuration..."
+mkdir -p "$HOME/.config/kitty"
+cp -rT "$REPO_DIR/kitty" "$HOME/.config/kitty/"
+
+
+# -------------------------------------------------------
+# 11) WALLPAPER
+# -------------------------------------------------------
+echo "[11] Installing wallpapers..."
+
+WALL="$REPO_DIR/wallpapers/jutro 4K.jpg"
+TARGET="$HOME/Slike/Wallpaper/jutro 4K.jpg"
+
+if [ -f "$WALL" ]; then
+    echo " → Setting desktop wallpaper..."
+    mkdir -p "$HOME/Slike/Wallpaper"
+    cp "$WALL" "$TARGET"
+
+    # GNOME / COSMIC wallpaper set (treba aktivnu sesiju da bi odmah radilo)
+    gsettings set org.gnome.desktop.background picture-uri "file://$TARGET"
+    gsettings set org.gnome.desktop.background picture-uri-dark "file://$TARGET"
+else
+    echo "WARNING: Wallpaper file not found at $WALL. Skipping wallpaper setup."
+fi
+
+
+# -------------------------------------------------------
+# 12) FINAL CLEANUP
+# -------------------------------------------------------
+echo "[12] Final cleanup..."
+sudo apt autoremove -y
+sudo apt autoclean -y
 flatpak uninstall --unused -y || true
 
 echo "====================================================="
 echo "     POSTINSTALL COMPLETE"
 echo "====================================================="
-echo "Please restart your system or run:  source ~/.zshrc"
+echo "Please restart your system or run:  source ~/.zshrc (nakon re-loga)"
