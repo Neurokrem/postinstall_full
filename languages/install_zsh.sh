@@ -9,9 +9,10 @@ echo "==> Installing Zsh and prerequisites..."
 # 1. Instalacija Zsh
 sudo apt install -y zsh
 
-# 2. Postavljanje Zsh kao zadane ljuske
+# 2. Postavljanje Zsh kao zadane ljuske (KRITIČNA KOREKCIJA)
 echo "Changing default shell to Zsh for user $USER..."
-sudo chsh -s "$(which zsh)"
+# Korištenje 'sudo chsh -s ... $USER' osigurava neinteraktivnu promjenu ljuske za aktivnog korisnika.
+sudo chsh -s "$(which zsh)" "$USER"
 
 # 3. Instalacija zsh4humans
 if [ ! -d "$HOME/.zsh4humans" ]; then
