@@ -155,7 +155,7 @@ bash "$REPO_DIR/flatpak/install.sh"
 # ======================================================
 
 # -------------------------------------------------------
-# 8) RESTORE DOTFILES (Nova Točka)
+# 8) RESTORE DOTFILES
 # -------------------------------------------------------
 if [ -d "$REPO_DIR/dotfiles" ]; then
     echo "[8] Restoring dotfiles..."
@@ -164,7 +164,7 @@ if [ -d "$REPO_DIR/dotfiles" ]; then
 fi
 
 # -------------------------------------------------------
-# 9) RESTORE DESKTOP CONFIG (COSMIC / Kitty) (Nova Točka)
+# 9) RESTORE DESKTOP CONFIG (COSMIC / Kitty)
 # -------------------------------------------------------
 if [ -d "$REPO_DIR/cosmic" ]; then
     echo "[9] Restoring COSMIC settings..."
@@ -228,7 +228,7 @@ bash "$REPO_DIR/languages/install_rbenv.sh"
 # -------------------------------------------------------
 echo "[12] Installing Zsh, zsh4humans, and Powerlevel10k..."
 if [ -f "$REPO_DIR/languages/install_zsh.sh" ]; then
-    # Ova skripta mora sadržavati 'sudo chsh -s ... $USER'
+    # Ova skripta mora sadržavati 'sudo chsh -s ... $USER' i ispravljen source init.zsh
     bash "$REPO_DIR/languages/install_zsh.sh"
 else
     echo "WARNING: install_zsh.sh not found. Skipping Zsh installation."
@@ -247,4 +247,3 @@ echo "====================================================="
 echo "     POSTINSTALL COMPLETE"
 echo "====================================================="
 echo "MOLIMO VAS DA RESTANTATE SUSTAV (REBOOT) SADA."
-reboot

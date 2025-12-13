@@ -9,7 +9,7 @@ echo "==> Installing Zsh and prerequisites..."
 # 1. Instalacija Zsh
 sudo apt install -y zsh
 
-# 2. Postavljanje Zsh kao zadane ljuske (KRITIČNA KOREKCIJA)
+# 2. Postavljanje Zsh kao zadane ljuske
 echo "Changing default shell to Zsh for user $USER..."
 # Korištenje 'sudo chsh -s ... $USER' osigurava neinteraktivnu promjenu ljuske za aktivnog korisnika.
 sudo chsh -s "$(which zsh)" "$USER"
@@ -23,11 +23,11 @@ else
     (cd "$HOME/.zsh4humans" && git pull)
 fi
 
-# 4. Postavljanje .zshrc
+# 4. Postavljanje .zshrc (KRITIČNA KOREKCIJA: zsh4humans.zsh -> init.zsh)
 echo "Creating/Updating ~/.zshrc for zsh4humans..."
 cat > "$HOME/.zshrc" << 'EOF'
 # Zsh4humans initialization
-source ~/.zsh4humans/zsh4humans.zsh
+source ~/.zsh4humans/init.zsh 
 EOF
 
 # 5. Konfiguracija Powerlevel10k (p10k)
