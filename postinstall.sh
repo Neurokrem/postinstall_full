@@ -110,7 +110,7 @@ install_deb() {
 
 # Primjena funkcije:
 install_deb "https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megasync-xUbuntu_24.04_amd64.deb" "megasync"
-# install_deb "https://download.qnap.com/Storage/Utility/QfinderPro_Linux.deb" "qfinder"
+# install_deb "https://download.qnap.com/Storage/Utility/QfinderPro_Linux.deb" "qfinder" # Komentirano
 install_deb "https://code-industry.net/public/master-pdf-editor-5.9.60-qt5.x86_64.deb" "masterpdf"
 
 
@@ -150,72 +150,52 @@ flatpak uninstall --unused -y || true
 bash "$REPO_DIR/flatpak/install.sh"
 
 
-# -------------------------------------------------------
-# 8) ZSH and POWERLEVEL10K INSTALL
-# -------------------------------------------------------
-echo "[8] Installing Zsh, zsh4humans, and Powerlevel10k..."
-if [ -f "$REPO_DIR/languages/install_zsh.sh" ]; then
-    bash "$REPO_DIR/languages/install_zsh.sh"
-else
-    echo "WARNING: install_zsh.sh not found. Skipping Zsh installation."
-fi
+# ======================================================
+# KONFIGURACIJE
+# (Redoslijed je promijenjen: Dotfiles, Wallpaper, Jezici, Zsh)
+# ======================================================
 
 # -------------------------------------------------------
-# 9) LANGUAGE/ENVIRONMENT INSTALLS (Go, rbenv, Conda)
-# -------------------------------------------------------
-echo "[9] Installing language environments (Go, Ruby, Conda)..."
-
-echo " → Running install_go.sh"
-bash "$REPO_DIR/languages/install_go.sh"
-
-echo " → Running install_rbenv.sh"
-bash "$REPO_DIR/languages/install_rbenv.sh"
-
-# echo " → Running install_conda.sh"
-# bash "$REPO_DIR/languages/install_conda.sh"
-
-# -------------------------------------------------------
-# 10) RESTORE DESKTOP CONFIG (COSMIC / Kitty)
-# -------------------------------------------------------
-if [ -d "$REPO_DIR/cosmic" ]; then
-    echo "[10] Restoring COSMIC settings..."
-    mkdir -p "$HOME/.config/cosmic"
-    cp -rT "$REPO_DIR/cosmic" "$HOME/.config/cosmic/"
-fi
-
-echo "[10b] Installing Kitty configuration..."
-mkdir -p "$HOME/.config/kitty"
-cp -rT "$REPO_DIR/kitty" "$HOME/.config/kitty/"
-
-# -------------------------------------------------------
-# 10a) RESTORE DOTFILES
+# 8) RESTORE DOTFILES (Nova točka 8)
 # -------------------------------------------------------
 if [ -d "$REPO_DIR/dotfiles" ]; then
-    echo "[10a] Restoring dotfiles..."
+    echo "[8] Restoring dotfiles..."
     # Korištenje -T za kopiranje Sadržaja izvora u odredište
     cp -rT "$REPO_DIR/dotfiles" "$HOME/"
 fi
 
 # -------------------------------------------------------
-# 11) WALLPAPER (REVIDIRANO)
+# 9) RESTORE DESKTOP CONFIG (COSMIC / Kitty) (Nova točka 9)
 # -------------------------------------------------------
-echo "[11] Installing wallpapers..."
+if [ -d "$REPO_DIR/cosmic" ]; then
+    echo "[9] Restoring COSMIC settings..."
+    mkdir -p "$HOME/.config/cosmic"
+    cp -rT "$REPO_DIR/cosmic" "$HOME/.config/cosmic/"
+fi
+
+echo "[9b] Installing Kitty configuration..."
+mkdir -p "$HOME/.config/kitty"
+cp -rT "$REPO_DIR/kitty" "$HOME/.config/kitty/"
+
+
+# -------------------------------------------------------
+# 10) WALLPAPER (REVIDIRANA LOGIKA I PUTANJA - Nova točka 10)
+# -------------------------------------------------------
+echo "[10] Installing wallpapers and setting default..."
 
 WALLPAPER_SOURCE_DIR="$REPO_DIR/wallpapers"
-TARGET_DIR="$HOME/Pictures/Wallpaper"
-TARGET_FILE="$TARGET_DIR/jutro 4K.jpg" # Pretpostavljamo da je ova slika zadana
+TARGET_DIR="$HOME/Slike/Wallpaper" # Ispravljena putanja na hrvatski "Slike"
+TARGET_FILE="$TARGET_DIR/jutro 4K.jpg" # Slika koju skripta postavlja kao zadanu
 
 if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
-    echo " → Copying ALL wallpapers to $TARGET_DIR..."
+    echo " → Copying ALL wallpapers from repo to $TARGET_DIR..."
     mkdir -p "$TARGET_DIR"
     
-    # Korištenje cp -rT za kopiranje SADRŽAJA foldera u ciljnu mapu
+    # cp -rT kopira SADRŽAJ foldera, a ne sam folder, u ciljnu mapu
     cp -rT "$WALLPAPER_SOURCE_DIR" "$TARGET_DIR"
 
     if [ -f "$TARGET_FILE" ]; then
-        echo " → Setting desktop wallpaper..."
-        
-        # Stvaranje ispravnog URI-ja za gsettings
+        echo " → Setting desktop wallpaper via gsettings..."
         WALLPAPER_URI="file://$TARGET_FILE"
         
         gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI"
@@ -227,10 +207,39 @@ else
     echo "WARNING: Wallpapers directory not found in repository. Skipping wallpaper setup."
 fi
 
+
 # -------------------------------------------------------
-# 12) FINAL CLEANUP
+# 11) LANGUAGE/ENVIRONMENT INSTALLS (Go, rbenv, Conda) (Nova točka 11)
 # -------------------------------------------------------
-echo "[12] Final cleanup..."
+echo "[11] Installing language environments (Go, Ruby, Conda)..."
+
+echo " → Running install_go.sh"
+bash "$REPO_DIR/languages/install_go.sh"
+
+echo " → Running install_rbenv.sh"
+bash "$REPO_DIR/languages/install_rbenv.sh"
+
+# Conda je ostavljena komentirana
+# echo " → Running install_conda.sh"
+# bash "$REPO_DIR/languages/install_conda.sh"
+
+
+# -------------------------------------------------------
+# 12) ZSH and POWERLEVEL10K INSTALL (KRITIČNA, ZADNJA TOČKA) (Nova točka 12)
+# -------------------------------------------------------
+echo "[12] Installing Zsh, zsh4humans, and Powerlevel10k..."
+if [ -f "$REPO_DIR/languages/install_zsh.sh" ]; then
+    # Ova skripta kreira ispravan ~/.zshrc i postavlja shell
+    bash "$REPO_DIR/languages/install_zsh.sh"
+else
+    echo "WARNING: install_zsh.sh not found. Skipping Zsh installation."
+fi
+
+
+# -------------------------------------------------------
+# 13) FINAL CLEANUP (Nova točka 13)
+# -------------------------------------------------------
+echo "[13] Final cleanup..."
 sudo apt autoremove -y
 sudo apt autoclean -y
 flatpak uninstall --unused -y || true
@@ -238,4 +247,4 @@ flatpak uninstall --unused -y || true
 echo "====================================================="
 echo "     POSTINSTALL COMPLETE"
 echo "====================================================="
-echo "Please restart your system or run:  source ~/.zshrc (nakon re-loga)"
+echo "MOLIMO VAS DA RESTARTATE SUSTAV (REBOOT) SADA."
