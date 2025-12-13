@@ -11,7 +11,7 @@ sudo apt install -y zsh
 
 # 2. Postavljanje Zsh kao zadane ljuske
 echo "Changing default shell to Zsh for user $USER..."
-chsh -s "$(which zsh)"
+sudo chsh -s "$(which zsh)"
 
 # 3. Instalacija zsh4humans
 if [ ! -d "$HOME/.zsh4humans" ]; then
