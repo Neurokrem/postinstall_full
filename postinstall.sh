@@ -110,9 +110,7 @@ install_deb() {
 
 # Primjena funkcije:
 install_deb "https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megasync-xUbuntu_24.04_amd64.deb" "megasync"
-# install_deb "https://download.qnap.com/Storage/Utility/QfinderPro_Linux.deb" "qfinder" # Komentirano
 install_deb "https://code-industry.net/public/master-pdf-editor-5.9.60-qt5.x86_64.deb" "masterpdf"
-
 
 ## VScode
 echo " → Adding VSCode repo"
@@ -183,8 +181,7 @@ cp -rT "$REPO_DIR/kitty" "$HOME/.config/kitty/"
 echo "[10] Installing wallpapers and setting default..."
 
 WALLPAPER_SOURCE_DIR="$REPO_DIR/wallpapers"
-TARGET_DIR="$HOME/Slike/Wallpapers" # ISPRAVLJENO: Koristi se 'Slike' i množina 'Wallpapers'
-TARGET_FILE="$TARGET_DIR/jutro 4K.jpg" 
+TARGET_DIR="$HOME/Pictures/Wallpapers" # TRAŽENA PUTANJA: /Pictures/Wallpapers
 
 if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
     echo " → Copying ALL wallpapers from repo to $TARGET_DIR..."
@@ -193,47 +190,10 @@ if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
     # cp -rT kopira SADRŽAJ foldera u ciljnu mapu
     cp -rT "$WALLPAPER_SOURCE_DIR" "$TARGET_DIR"
 
-    if [ -f "$TARGET_FILE" ]; then
-        echo " → Setting desktop wallpaper via gsettings..."
-        WALLPAPER_URI="file://$TARGET_FILE"
-        
-        gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI"
-        gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI"
-    else
-        echo "WARNING: Default wallpaper file ($TARGET_FILE) not found after copy."
-    fi
+    echo "INFO: Wallpapers copied. Setting via gsettings is skipped as requested."
 else
     echo "WARNING: Wallpapers directory not found in repository. Skipping wallpaper setup."
 fi
-
-
-# -------------------------------------------------------
-# 11) LANGUAGE/ENVIRONMENT INSTALLS (Go, rbenv, Conda)
-# -------------------------------------------------------
-echo "[11] Installing language environments (Go, Ruby, Conda)..."
-
-echo " → Running install_go.sh"
-bash "$REPO_DIR/languages/install_go.sh"
-
-echo " → Running install_rbenv.sh"
-bash "$REPO_DIR/languages/install_rbenv.sh"
-
-# Conda je ostavljena komentirana
-# echo " → Running install_conda.sh"
-# bash "$REPO_DIR/languages/install_conda.sh"
-
-
-# -------------------------------------------------------
-# 12) ZSH and POWERLEVEL10K INSTALL (KRITIČNA: ZADNJA KONFIGURACIJSKA TOČKA)
-# -------------------------------------------------------
-echo "[12] Installing Zsh, zsh4humans, and Powerlevel10k..."
-if [ -f "$REPO_DIR/languages/install_zsh.sh" ]; then
-    # Ova skripta mora sadržavati 'sudo chsh -s ... $USER' i ispravljen source init.zsh
-    bash "$REPO_DIR/languages/install_zsh.sh"
-else
-    echo "WARNING: install_zsh.sh not found. Skipping Zsh installation."
-fi
-
 
 # -------------------------------------------------------
 # 13) FINAL CLEANUP
@@ -246,4 +206,6 @@ flatpak uninstall --unused -y || true
 echo "====================================================="
 echo "     POSTINSTALL COMPLETE"
 echo "====================================================="
-echo "MOLIMO VAS DA RESTANTATE SUSTAV (REBOOT) SADA."
+echo "SUSTAV ĆE IZVESTI REBOOT SADA."
+sleep(3)
+reboot
