@@ -207,5 +207,5 @@ echo "====================================================="
 echo "     POSTINSTALL COMPLETE"
 echo "====================================================="
 echo "SUSTAV ĆE IZVESTI REBOOT SADA."
-sleep(3)
+sleep 3
 reboot
