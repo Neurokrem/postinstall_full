@@ -33,6 +33,7 @@ init \
 inxi \
 isc-dhcp-common \
 krita \
+kitty \
 language-pack-zh-hans \
 language-pack-zh-hant \
 libconfig++9v5 \
@@ -55,6 +56,7 @@ mesa-utils \
 mesa-vulkan-drivers \
 mesa-vulkan-drivers:i386 \
 mokutil \
+nautilus \
 nautilus-sendto \
 ncdu \
 netcat-openbsd \

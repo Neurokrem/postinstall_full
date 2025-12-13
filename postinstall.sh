@@ -175,20 +175,10 @@ bash "$REPO_DIR/languages/install_rbenv.sh"
 # bash "$REPO_DIR/languages/install_conda.sh"
 
 # -------------------------------------------------------
-# 10) RESTORE DOTFILES
-# -------------------------------------------------------
-if [ -d "$REPO_DIR/dotfiles" ]; then
-    echo "[10] Restoring dotfiles..."
-    # Korištenje -T za kopiranje Sadržaja izvora u odredište
-    cp -rT "$REPO_DIR/dotfiles" "$HOME/"
-fi
-
-
-# -------------------------------------------------------
-# 10a) RESTORE DESKTOP CONFIG (COSMIC / Kitty)
+# 10) RESTORE DESKTOP CONFIG (COSMIC / Kitty)
 # -------------------------------------------------------
 if [ -d "$REPO_DIR/cosmic" ]; then
-    echo "[10a] Restoring COSMIC settings..."
+    echo "[10] Restoring COSMIC settings..."
     mkdir -p "$HOME/.config/cosmic"
     cp -rT "$REPO_DIR/cosmic" "$HOME/.config/cosmic/"
 fi
@@ -197,27 +187,45 @@ echo "[10b] Installing Kitty configuration..."
 mkdir -p "$HOME/.config/kitty"
 cp -rT "$REPO_DIR/kitty" "$HOME/.config/kitty/"
 
+# -------------------------------------------------------
+# 10a) RESTORE DOTFILES
+# -------------------------------------------------------
+if [ -d "$REPO_DIR/dotfiles" ]; then
+    echo "[10a] Restoring dotfiles..."
+    # Korištenje -T za kopiranje Sadržaja izvora u odredište
+    cp -rT "$REPO_DIR/dotfiles" "$HOME/"
+fi
 
 # -------------------------------------------------------
-# 11) WALLPAPER
+# 11) WALLPAPER (REVIDIRANO)
 # -------------------------------------------------------
 echo "[11] Installing wallpapers..."
 
-WALL="$REPO_DIR/wallpapers/jutro 4K.jpg"
-TARGET="$HOME/Slike/Wallpaper/jutro 4K.jpg"
+WALLPAPER_SOURCE_DIR="$REPO_DIR/wallpapers"
+TARGET_DIR="$HOME/Slike/Wallpaper"
+TARGET_FILE="$TARGET_DIR/jutro 4K.jpg" # Pretpostavljamo da je ova slika zadana
 
-if [ -f "$WALL" ]; then
-    echo " → Setting desktop wallpaper..."
-    mkdir -p "$HOME/Slike/Wallpaper"
-    cp "$WALL" "$TARGET"
+if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
+    echo " → Copying ALL wallpapers to $TARGET_DIR..."
+    mkdir -p "$TARGET_DIR"
+    
+    # Korištenje cp -rT za kopiranje SADRŽAJA foldera u ciljnu mapu
+    cp -rT "$WALLPAPER_SOURCE_DIR" "$TARGET_DIR"
 
-    # GNOME / COSMIC wallpaper set (treba aktivnu sesiju da bi odmah radilo)
-    gsettings set org.gnome.desktop.background picture-uri "file://$TARGET"
-    gsettings set org.gnome.desktop.background picture-uri-dark "file://$TARGET"
+    if [ -f "$TARGET_FILE" ]; then
+        echo " → Setting desktop wallpaper..."
+        
+        # Stvaranje ispravnog URI-ja za gsettings
+        WALLPAPER_URI="file://$TARGET_FILE"
+        
+        gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI"
+        gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI"
+    else
+        echo "WARNING: Default wallpaper file ($TARGET_FILE) not found after copy."
+    fi
 else
-    echo "WARNING: Wallpaper file not found at $WALL. Skipping wallpaper setup."
+    echo "WARNING: Wallpapers directory not found in repository. Skipping wallpaper setup."
 fi
-
 
 # -------------------------------------------------------
 # 12) FINAL CLEANUP
