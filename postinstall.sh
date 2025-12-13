@@ -171,8 +171,8 @@ bash "$REPO_DIR/languages/install_go.sh"
 echo " → Running install_rbenv.sh"
 bash "$REPO_DIR/languages/install_rbenv.sh"
 
-echo " → Running install_conda.sh"
-bash "$REPO_DIR/languages/install_conda.sh"
+# echo " → Running install_conda.sh"
+# bash "$REPO_DIR/languages/install_conda.sh"
 
 # -------------------------------------------------------
 # 10) RESTORE DOTFILES
