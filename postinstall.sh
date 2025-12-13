@@ -202,7 +202,7 @@ fi
 echo "[11] Installing wallpapers..."
 
 WALLPAPER_SOURCE_DIR="$REPO_DIR/wallpapers"
-TARGET_DIR="$HOME/Slike/Wallpaper"
+TARGET_DIR="$HOME/Pictures/Wallpaper"
 TARGET_FILE="$TARGET_DIR/jutro 4K.jpg" # Pretpostavljamo da je ova slika zadana
 
 if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
