@@ -110,7 +110,7 @@ install_deb() {
 
 # Primjena funkcije:
 install_deb "https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megasync-xUbuntu_24.04_amd64.deb" "megasync"
-install_deb "https://download.qnap.com/QfinderPro/7.13.0.1014/QNAPQfinderProUbuntux64-7.13.0.1014.deb" "qfinder"
+install_deb "https://download.qnap.com/Storage/Utility/QNAPQfinderProUbuntux64-7.15.3.1118.deb" "qfinder"
 install_deb "https://code-industry.net/public/master-pdf-editor-5.9.60-qt5.x86_64.deb" "masterpdf"
 
 
