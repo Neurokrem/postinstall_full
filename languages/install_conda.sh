@@ -5,30 +5,34 @@ ANACONDA_SH="$HOME/Anaconda3-latest-Linux-x86_64.sh"
 CONDA_DIR="$HOME/anaconda3"
 
 echo "Downloading Anaconda installer..."
-# Koristimo -O da preuzimanje bude vidljivo (ne -q)
+# UKLONJENO -q (quiet) da bismo vidjeli eventualnu grešku 404/server error
 wget https://repo.anaconda.com/archive/Anaconda3-latest-Linux-x86_64.sh -O "${ANACONDA_SH}"
 
 echo "Installing Anaconda (non-interactive) to $CONDA_DIR ..."
-# -b (batch), -p (prefix)
+
+# Provjera postoji li već instalacija (da izbjegnemo grešku instalera)
+if [ -d "$CONDA_DIR" ]; then
+    echo "WARNING: Conda directory already exists. Removing old installation..."
+    rm -rf "$CONDA_DIR"
+fi
+
+# Pokrećemo instalaciju.
+# -b (batch mode), -p (prefix/install path)
 bash "${ANACONDA_SH}" -b -p "$CONDA_DIR"
 rm -f "${ANACONDA_SH}"
 
-# Provjera je li instalacija uspjela
+# ROBUSTNA PROVJERA: Ako instalacija nije stvorila izvršnu datoteku, prekini skriptu.
 if [ ! -f "$CONDA_DIR/bin/conda" ]; then
-    echo "ERROR: Conda installation failed or was interrupted. Check logs above." >&2
+    echo "ERROR: Conda installation failed! The 'conda' executable was not found." >&2
     exit 1
 fi
 
-# Privremeno dodajemo Conda bin direktorij u PATH skripte
-# Ovo je ključno kako bi Conda init mogao raditi u sljedećem koraku
-export PATH="$CONDA_DIR/bin:$PATH"
-
-# Trajno dodavanje PATH-a u ~/.zshrc
+# Trajno dodavanje PATH-a u ~/.zshrc (ako već nije dodano)
 grep -qxF 'export PATH="$HOME/anaconda3/bin:$PATH"' ~/.zshrc || echo 'export PATH="$HOME/anaconda3/bin:$PATH"' >> ~/.zshrc
 
 # Inicijalizacija conda za zsh
 echo "Initializing Conda for Zsh..."
-# Naredba će raditi jer je Conda sada u PATH unutar skripte
-"$CONDA_DIR/bin/conda" init zsh
+# Koristimo punu putanju; || true osigurava da skripta ne stane ako init prijavi warning.
+"$CONDA_DIR/bin/conda" init zsh || true
 
 echo "Anaconda installed. Restart shell or run: source ~/.zshrc"
