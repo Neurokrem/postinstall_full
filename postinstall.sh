@@ -192,8 +192,8 @@ echo " → Running install_rbenv.sh"
 bash "$REPO_DIR/languages/install_rbenv.sh"
 
 # Conda je ostavljena komentirana
-echo " → Running install_conda.sh"
-bash "$REPO_DIR/languages/install_conda.sh"
+#echo " → Running install_conda.sh"
+#bash "$REPO_DIR/languages/install_conda.sh"
 
 # -------------------------------------------------------
 # 11) WALLPAPER (AUTOMATSKO DODAVANJE DIREKTORIJA)
