@@ -164,7 +164,7 @@ fi
 if [ -d "$REPO_DIR/wal" ]; then
     echo "[8b] Restoring pywal..."
     # Korištenje -T za kopiranje Sadržaja izvora u odredište
-    cp -rT "$REPO_DIR/dotfiles" "$HOME/.cache/wal/"
+    cp -rT "$REPO_DIR/wal" "$HOME/.cache/wal/"
 fi
 
 # -------------------------------------------------------
