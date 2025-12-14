@@ -179,10 +179,26 @@ if [ -d "$REPO_DIR/icons" ]; then
     mkdir -p "$HOME/.local/share/icons"
     cp -rT "$REPO_DIR/icons" "$HOME/.local/share/icons"
 fi
+
 # -------------------------------------------------------
-# 10) WALLPAPER (REVIDIRANA LOGIKA I PUTANJA - ISPRAVNA)
+# 10) LANGUAGE/ENVIRONMENT INSTALLS (Go, rbenv, Conda)
 # -------------------------------------------------------
-echo "[10] Installing wallpapers and setting default..."
+echo "[10] Installing language environments (Go, Ruby, Conda)..."
+
+echo " → Running install_go.sh"
+bash "$REPO_DIR/languages/install_go.sh"
+
+echo " → Running install_rbenv.sh"
+bash "$REPO_DIR/languages/install_rbenv.sh"
+
+# Conda je ostavljena komentirana
+echo " → Running install_conda.sh"
+bash "$REPO_DIR/languages/install_conda.sh"
+
+# -------------------------------------------------------
+# 11) WALLPAPER (REVIDIRANA LOGIKA I PUTANJA - ISPRAVNA)
+# -------------------------------------------------------
+echo "[11] Installing wallpapers and setting default..."
 
 WALLPAPER_SOURCE_DIR="$REPO_DIR/wallpapers"
 TARGET_DIR="$HOME/Pictures/Wallpapers" # TRAŽENA PUTANJA: /Pictures/Wallpapers
@@ -202,7 +218,7 @@ fi
 # -------------------------------------------------------
 # 13) FINAL CLEANUP
 # -------------------------------------------------------
-echo "[13] Final cleanup..."
+echo "[12] Final cleanup..."
 sudo apt autoremove -y
 sudo apt autoclean -y
 flatpak uninstall --unused -y || true
