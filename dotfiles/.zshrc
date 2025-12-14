@@ -131,7 +131,7 @@ unset __conda_setup
 export PATH="$PATH:/opt/nvim-linux64/bin"
 
 # Load rbenv
-eval "$(/home/neurokrem/.rbenv/bin/rbenv init - zsh)"
+eval "$($HOME/.rbenv/bin/rbenv init - zsh)"
 export GEM_HOME=$HOME/gems
 export PATH=$HOME/gems/bin:$PATH
 export PATH=$PATH:/usr/local/go/bin
