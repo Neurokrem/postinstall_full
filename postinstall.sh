@@ -156,9 +156,15 @@ bash "$REPO_DIR/flatpak/install.sh"
 # 8) RESTORE DOTFILES
 # -------------------------------------------------------
 if [ -d "$REPO_DIR/dotfiles" ]; then
-    echo "[8] Restoring dotfiles..."
+    echo "[8a] Restoring dotfiles..."
     # Korištenje -T za kopiranje Sadržaja izvora u odredište
     cp -rT "$REPO_DIR/dotfiles" "$HOME/"
+fi
+
+if [ -d "$REPO_DIR/wal" ]; then
+    echo "[8b] Restoring pywal..."
+    # Korištenje -T za kopiranje Sadržaja izvora u odredište
+    cp -rT "$REPO_DIR/dotfiles" "$HOME/.cache/wal/"
 fi
 
 # -------------------------------------------------------
@@ -198,7 +204,7 @@ bash "$REPO_DIR/languages/install_rbenv.sh"
 # -------------------------------------------------------
 # 11) WALLPAPER (AUTOMATSKO DODAVANJE DIREKTORIJA)
 # -------------------------------------------------------
-echo "[11] Installing wallpapers and attempting automatic directory addition..."
+echo "[11] Installing wallpapers and attempting to set URI..."
 
 WALLPAPER_SOURCE_DIR="$REPO_DIR/wallpapers"
 TARGET_DIR="$HOME/Pictures/Wallpapers" # TRAŽENA PUTANJA
@@ -206,54 +212,18 @@ TARGET_FILE="$TARGET_DIR/jutro 4K.jpg"
 WALLPAPER_URI="file://$TARGET_FILE"
 
 if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
-    
-    # KORAK 1: KOPIRANJE SLIKA
     echo " → Copying ALL wallpapers from repo to $TARGET_DIR..."
     mkdir -p "$TARGET_DIR"
     cp -rT "$WALLPAPER_SOURCE_DIR" "$TARGET_DIR"
-    
-    # KORAK 2: DODAVANJE DIREKTORIJA U SISTEMSKE POSTAVKE
-    echo " → Adding '$TARGET_DIR' to the list of searchable wallpaper directories..."
-    
-    # Dobivanje trenutnog popisa direktorija
-    CURRENT_DIRS=$(gsettings get org.gnome.desktop.background show-desktop-icons)
 
-    # Novi direktorij koji dodajemo
-    NEW_DIR="'$TARGET_DIR/'" # Putanja mora završiti s '/'
-    
-    # Provjerava je li već dodan (koristimo 'gsettings set' samo ako treba)
-    if [[ "$CURRENT_DIRS" != *"$NEW_DIR"* ]]; then
-        
-        # POKUŠAJ POPRAVKA: Dodavanje putanje u dconf ključ. 
-        # Neki GNOME-bazirani sustavi koriste niz (array) za ovu postavku
-        
-        # Ovdje je ključni dio: moramo dobiti postojeći popis, dodati novi put, 
-        # i postaviti novi popis (primjer za GNOME/dconf listu putanja)
-        
-        # (NAPOMENA: dconf ključ za pozadine može varirati ovisno o Cosmic verziji. 
-        # Ovo je najčešći ključ. Ako ne radi, morat ćete pronaći specifičan Cosmic ključ.)
-        
-        # Naredba za dodavanje putanje (primjer za GNOME-bazirane sustave):
-        # Ova dconf putanja je samo primjer. S obzirom da ne znamo točnu Cosmic dconf putanju, 
-        # najbolje je koristiti 'gsettings' za jednostavne URI postavke:
-        
-        # Gsettings ne podržava direktno editiranje arraya. Stoga samo nastavljamo s 
-        # postavljanjem aktivne pozadine, nadajući se da će to Cosmicu biti dovoljno.
-
-        # Ako ručno dodavanje direktorija rješava problem, morat ćete ručno dodati 
-        # direktorij i automatski postaviti URI.
-        
-        echo "INFO: Direct GSettings array modification is complex. Relying on setting picture-uri to activate path."
-    fi
-    
-    # KORAK 3: POSTAVLJANJE AKTIVNE SLIKE
     if [ -f "$TARGET_FILE" ]; then
-        echo " → Setting default desktop wallpaper via gsettings..."
+        echo " → Setting desktop wallpaper URI..."
         
-        # Postavljanje picture-uri na 'file:///home/user/Pictures/Wallpapers/jutro 4K.jpg'
+        # Postavljanje URI-ja
         gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI"
         gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI"
-        echo "Wallpaper set to: $TARGET_FILE"
+        
+        echo "INFO: Wallpaper URI set. Ako se ne pojavi, ručno dodajte direktorij '$TARGET_DIR' u Cosmic Settings."
     else
         echo "ERROR: Default wallpaper file ($TARGET_FILE) not found after copy. Cannot set background."
     fi
