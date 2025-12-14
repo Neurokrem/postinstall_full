@@ -162,7 +162,7 @@ if [ -d "$REPO_DIR/dotfiles" ]; then
 fi
 
 # -------------------------------------------------------
-# 9) RESTORE DESKTOP CONFIG (COSMIC / Kitty)
+# 9) RESTORE DESKTOP CONFIG (COSMIC / Kitty / ikone)
 # -------------------------------------------------------
 if [ -d "$REPO_DIR/cosmic" ]; then
     echo "[9] Restoring COSMIC settings..."
@@ -174,7 +174,11 @@ echo "[9b] Installing Kitty configuration..."
 mkdir -p "$HOME/.config/kitty"
 cp -rT "$REPO_DIR/kitty" "$HOME/.config/kitty/"
 
-
+if [ -d "$REPO_DIR/icons" ]; then
+    echo "[9] Restoring icons..."
+    mkdir -p "$HOME/.local/share/icons"
+    cp -rT "$REPO_DIR/icons" "$HOME/.local/share/icons"
+fi
 # -------------------------------------------------------
 # 10) WALLPAPER (REVIDIRANA LOGIKA I PUTANJA - ISPRAVNA)
 # -------------------------------------------------------
