@@ -89,6 +89,7 @@ wine \
 wine32:i386 \
 wine64 \
 winetricks \
+zsh \
 xrdp 
 
 # kraj
