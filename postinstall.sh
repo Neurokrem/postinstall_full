@@ -187,41 +187,44 @@ if [ -d "$REPO_DIR/icons" ]; then
 fi
 
 # -------------------------------------------------------
-# 10) WALLPAPER (KOPIRANJE NA ISPRAVNU PUTANJU + ROBUSTNO POSTAVLJANJE URI-ja)
+# 10 (NAJROBUSTNIJI FIX SA SYSTEMCTL --USER)
 # -------------------------------------------------------
-echo "[10] Installing wallpapers and attempting to set URI (robust fix)..."
+echo "[10] Installing wallpapers and attempting to set URI (Systemctl fix)..."
 
 WALLPAPER_SOURCE_DIR="$REPO_DIR/wallpapers"
-TARGET_DIR="$HOME/Pictures/Wallpaper" # ISPRAVLJENO: Koristi se singular 'Wallpaper'
+TARGET_DIR="$HOME/Pictures/Wallpaper" # ISPRAVNO: Jednina 'Wallpaper'
 TARGET_FILE="$TARGET_DIR/jutro 4K.jpg" 
 WALLPAPER_URI="file://$TARGET_FILE"
 
 if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
     echo " → Copying ALL wallpapers from repo to $TARGET_DIR..."
     mkdir -p "$TARGET_DIR"
-    # Kopiranje sadržaja iz izvora u ciljnu mapu
+    
+    # cp -rT kopira sadržaj
     cp -rT "$WALLPAPER_SOURCE_DIR" "$TARGET_DIR"
 
     if [ -f "$TARGET_FILE" ]; then
         echo " → Setting desktop wallpaper URI via gsettings..."
         
-        # Pokušaj pronalaska D-Bus adrese (potrebno za rad gsettingsa iz skripte)
-        DBUS_ADDRESS=$(pgrep -u "$USER" gnome-session | xargs -r -I {} cat /proc/{}/environ 2>/dev/null | tr '\0' '\n' | grep DBUS_SESSION_BUS_ADDRESS= | cut -d "=" -f 2)
+        # Pokušaj pronalaska D-Bus adrese putem systemd korisničkog okruženja
+        DBUS_ADDRESS=$(systemctl --user show-environment | grep DBUS_SESSION_BUS_ADDRESS | cut -d "=" -f 2)
         
         if [ -n "$DBUS_ADDRESS" ]; then
-            echo " → Found D-Bus session address. Attempting robust set..."
+            echo " → Found D-Bus session address via systemctl. Attempting robust set..."
             
-            # Postavljanje URI-ja i forsiranje D-Bus konteksta
-            DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS" gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI" || true
-            DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS" gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI" || true
+            # Postavljanje D-Bus adrese i URI-ja
+            export DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS"
             
-            # Dodatna naredba za osvježavanje Pop!_OS-a/Cosmica
-            DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS" gsettings set org.gnome.desktop.background current-folder "$TARGET_DIR" || true
+            gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI" || true
+            gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI" || true
+            
+            # Eksplicitno postavljanje current-folder (korisno za Pop!_OS)
+            gsettings set org.gnome.desktop.background current-folder "$TARGET_DIR" || true
             
         else
-            echo "WARNING: Could not find D-Bus session address. Relying on simple gsettings call."
+            echo "WARNING: Could not find D-Bus session address via systemctl. Relying on simple gsettings call."
             
-            # Fallback (za slučaj da se skripta pokreće direktno iz GUI terminala)
+            # Fallback za slučaj da se skripta pokreće u već aktivnom GUI terminalu
             gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI" || true
             gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI" || true
             gsettings set org.gnome.desktop.background current-folder "$TARGET_DIR" || true
