@@ -187,9 +187,9 @@ if [ -d "$REPO_DIR/icons" ]; then
 fi
 
 # -------------------------------------------------------
-# 10 WALLPAPER
+# 10) WALLPAPER (KOPIRANJE + URI + REFRESH HACK)
 # -------------------------------------------------------
-echo "[10] Installing wallpapers and attempting to set URI (Systemctl fix)..."
+echo "[10] Installing wallpapers and attempting to set URI (Toggle Refresh)..."
 
 WALLPAPER_SOURCE_DIR="$REPO_DIR/wallpapers"
 TARGET_DIR="$HOME/Pictures/Wallpaper" # ISPRAVNO: Jednina 'Wallpaper'
@@ -199,11 +199,27 @@ WALLPAPER_URI="file://$TARGET_FILE"
 if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
     echo " → Copying ALL wallpapers from repo to $TARGET_DIR..."
     mkdir -p "$TARGET_DIR"
-    
-    # cp -rT kopira sadržaj
     cp -rT "$WALLPAPER_SOURCE_DIR" "$TARGET_DIR"
+
+    if [ -f "$TARGET_FILE" ]; then
+        echo " → Setting desktop wallpaper URI..."
+        
+        # 1. Postavljanje URI-ja
+        gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI" || true
+        gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI" || true
+        
+        # 2. Forsiranje osvježavanja (Toggle Hack)
+        # Pretpostavljamo da je 'zoom' željena i trenutna opcija.
+        gsettings set org.gnome.desktop.background picture-options 'stretched' || true
+        gsettings set org.gnome.desktop.background picture-options 'zoom' || true
+        
+        echo "INFO: Wallpaper URI set. Pokušaj osvježavanja dovršen."
+    else
+        echo "ERROR: Default wallpaper file ($TARGET_FILE) not found after copy. Cannot set background."
+    fi
+else
+    echo "WARNING: Wallpapers directory not found in repository. Skipping wallpaper setup."
 fi
-       
 # -------------------------------------------------------
 # 11) LANGUAGE/ENVIRONMENT INSTALLS (Go, rbenv, Conda)
 # -------------------------------------------------------
