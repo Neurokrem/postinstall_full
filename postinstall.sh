@@ -187,9 +187,57 @@ if [ -d "$REPO_DIR/icons" ]; then
 fi
 
 # -------------------------------------------------------
-# 10) LANGUAGE/ENVIRONMENT INSTALLS (Go, rbenv, Conda)
+# 10) WALLPAPER (KOPIRANJE NA ISPRAVNU PUTANJU + ROBUSTNO POSTAVLJANJE URI-ja)
 # -------------------------------------------------------
-echo "[10] Installing language environments (Go, Ruby, Conda)..."
+echo "[10] Installing wallpapers and attempting to set URI (robust fix)..."
+
+WALLPAPER_SOURCE_DIR="$REPO_DIR/wallpapers"
+TARGET_DIR="$HOME/Pictures/Wallpaper" # ISPRAVLJENO: Koristi se singular 'Wallpaper'
+TARGET_FILE="$TARGET_DIR/jutro 4K.jpg" 
+WALLPAPER_URI="file://$TARGET_FILE"
+
+if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
+    echo " → Copying ALL wallpapers from repo to $TARGET_DIR..."
+    mkdir -p "$TARGET_DIR"
+    # Kopiranje sadržaja iz izvora u ciljnu mapu
+    cp -rT "$WALLPAPER_SOURCE_DIR" "$TARGET_DIR"
+
+    if [ -f "$TARGET_FILE" ]; then
+        echo " → Setting desktop wallpaper URI via gsettings..."
+        
+        # Pokušaj pronalaska D-Bus adrese (potrebno za rad gsettingsa iz skripte)
+        DBUS_ADDRESS=$(pgrep -u "$USER" gnome-session | xargs -r -I {} cat /proc/{}/environ 2>/dev/null | tr '\0' '\n' | grep DBUS_SESSION_BUS_ADDRESS= | cut -d "=" -f 2)
+        
+        if [ -n "$DBUS_ADDRESS" ]; then
+            echo " → Found D-Bus session address. Attempting robust set..."
+            
+            # Postavljanje URI-ja i forsiranje D-Bus konteksta
+            DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS" gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI" || true
+            DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS" gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI" || true
+            
+            # Dodatna naredba za osvježavanje Pop!_OS-a/Cosmica
+            DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS" gsettings set org.gnome.desktop.background current-folder "$TARGET_DIR" || true
+            
+        else
+            echo "WARNING: Could not find D-Bus session address. Relying on simple gsettings call."
+            
+            # Fallback (za slučaj da se skripta pokreće direktno iz GUI terminala)
+            gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI" || true
+            gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI" || true
+            gsettings set org.gnome.desktop.background current-folder "$TARGET_DIR" || true
+        fi
+
+        echo "INFO: Wallpaper URI set. Ako se ne pojavi, OBAVEZNO REBOOTAJTE sustav."
+    else
+        echo "ERROR: Default wallpaper file ($TARGET_FILE) not found after copy. Cannot set background."
+    fi
+else
+    echo "WARNING: Wallpapers directory not found in repository. Skipping wallpaper setup."
+fi
+# -------------------------------------------------------
+# 11) LANGUAGE/ENVIRONMENT INSTALLS (Go, rbenv, Conda)
+# -------------------------------------------------------
+echo "[11] Installing language environments (Go, Ruby, Conda)..."
 
 echo " → Running install_go.sh"
 bash "$REPO_DIR/languages/install_go.sh"
@@ -200,36 +248,6 @@ bash "$REPO_DIR/languages/install_rbenv.sh"
 # Conda je ostavljena komentirana
 #echo " → Running install_conda.sh"
 #bash "$REPO_DIR/languages/install_conda.sh"
-
-# -------------------------------------------------------
-# 11) WALLPAPER (AUTOMATSKO DODAVANJE DIREKTORIJA)
-# -------------------------------------------------------
-echo "[11] Installing wallpapers and attempting to set URI..."
-
-WALLPAPER_SOURCE_DIR="$REPO_DIR/wallpapers"
-TARGET_DIR="$HOME/Pictures/Wallpapers" # TRAŽENA PUTANJA
-TARGET_FILE="$TARGET_DIR/jutro 4K.jpg" 
-WALLPAPER_URI="file://$TARGET_FILE"
-
-if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
-    echo " → Copying ALL wallpapers from repo to $TARGET_DIR..."
-    mkdir -p "$TARGET_DIR"
-    cp -rT "$WALLPAPER_SOURCE_DIR" "$TARGET_DIR"
-
-    if [ -f "$TARGET_FILE" ]; then
-        echo " → Setting desktop wallpaper URI..."
-        
-        # Postavljanje URI-ja
-        gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI"
-        gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI"
-        
-        echo "INFO: Wallpaper URI set. Ako se ne pojavi, ručno dodajte direktorij '$TARGET_DIR' u Cosmic Settings."
-    else
-        echo "ERROR: Default wallpaper file ($TARGET_FILE) not found after copy. Cannot set background."
-    fi
-else
-    echo "WARNING: Wallpapers directory not found in repository. Skipping wallpaper setup."
-fi
 
 # -------------------------------------------------------
 # 12) FINAL CLEANUP
