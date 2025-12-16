@@ -187,7 +187,7 @@ if [ -d "$REPO_DIR/icons" ]; then
 fi
 
 # -------------------------------------------------------
-# 10 (NAJROBUSTNIJI FIX SA SYSTEMCTL --USER)
+# 10 WALLPAPER
 # -------------------------------------------------------
 echo "[10] Installing wallpapers and attempting to set URI (Systemctl fix)..."
 
@@ -202,41 +202,8 @@ if [ -d "$WALLPAPER_SOURCE_DIR" ]; then
     
     # cp -rT kopira sadržaj
     cp -rT "$WALLPAPER_SOURCE_DIR" "$TARGET_DIR"
-
-    if [ -f "$TARGET_FILE" ]; then
-        echo " → Setting desktop wallpaper URI via gsettings..."
-        
-        # Pokušaj pronalaska D-Bus adrese putem systemd korisničkog okruženja
-        DBUS_ADDRESS=$(systemctl --user show-environment | grep DBUS_SESSION_BUS_ADDRESS | cut -d "=" -f 2)
-        
-        if [ -n "$DBUS_ADDRESS" ]; then
-            echo " → Found D-Bus session address via systemctl. Attempting robust set..."
-            
-            # Postavljanje D-Bus adrese i URI-ja
-            export DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS"
-            
-            gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI" || true
-            gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI" || true
-            
-            # Eksplicitno postavljanje current-folder (korisno za Pop!_OS)
-            gsettings set org.gnome.desktop.background current-folder "$TARGET_DIR" || true
-            
-        else
-            echo "WARNING: Could not find D-Bus session address via systemctl. Relying on simple gsettings call."
-            
-            # Fallback za slučaj da se skripta pokreće u već aktivnom GUI terminalu
-            gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER_URI" || true
-            gsettings set org.gnome.desktop.background picture-uri-dark "$WALLPAPER_URI" || true
-            gsettings set org.gnome.desktop.background current-folder "$TARGET_DIR" || true
-        fi
-
-        echo "INFO: Wallpaper URI set. Ako se ne pojavi, OBAVEZNO REBOOTAJTE sustav."
-    else
-        echo "ERROR: Default wallpaper file ($TARGET_FILE) not found after copy. Cannot set background."
-    fi
-else
-    echo "WARNING: Wallpapers directory not found in repository. Skipping wallpaper setup."
 fi
+       
 # -------------------------------------------------------
 # 11) LANGUAGE/ENVIRONMENT INSTALLS (Go, rbenv, Conda)
 # -------------------------------------------------------
